@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using QSearchService.Application.Interfaces;
 using QSearchService.Infrastructure.Persistence.Database;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ISearchServiceDbContext, SearchServiceDbContext>();
 
 builder.Services.AddDbContext<SearchServiceDbContext>(options =>
 {

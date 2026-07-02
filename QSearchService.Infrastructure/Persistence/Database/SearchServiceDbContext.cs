@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Models;
 using QSearchService.Infrastructure.Persistence.TableConfiguration;
 
 namespace QSearchService.Infrastructure.Persistence.Database;
 
-public class SearchServiceDbContext: DbContext
+public class SearchServiceDbContext: DbContext, ISearchServiceDbContext
 {
 
     public DbSet<SearchVectorDocument> SearchVectorDocuments { get; set; }

@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\QSearchService.Application\QSearchService.Application.csproj" />
       <ProjectReference Include="..\QSearchService.Domain\QSearchService.Domain.csproj" />
     </ItemGroup>
 
