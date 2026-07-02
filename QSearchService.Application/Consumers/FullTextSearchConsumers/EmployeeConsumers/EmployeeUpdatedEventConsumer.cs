@@ -5,7 +5,7 @@ using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QUserService.Contracts.Events.EmployeeEvent;
 
-namespace QSearchService.Application.Consumers.EmployeeConsumers;
+namespace QSearchService.Application.Consumers.FullTextSearchConsumers.EmployeeConsumers;
 
 public class EmployeeUpdatedEventConsumer: IConsumer<EmployeeUpdatedEvent>
 {

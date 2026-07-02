@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 
-namespace QSearchService.Application.Consumers.CompanyConsumers;
+namespace QSearchService.Application.Consumers.FullTextSearchConsumers.CompanyConsumers;
 
 public class CompanyUpdatedEventConsumer: IConsumer<CompanyUpdatedEvent>
 {

@@ -1,34 +1,34 @@
-using BranchService.Contracts.Events.BranchEvents;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
+using QUserService.Contracts.Events.EmployeeEvent;
 
-namespace QSearchService.Application.Consumers.BranchConsumers;
+namespace QSearchService.Application.Consumers.FullTextSearchConsumers.EmployeeConsumers;
 
-public class BranchDeletedEventConsumer : IConsumer<BranchDeletedEvent>
+public class EmployeeDeletedEventConsumer : IConsumer<EmployeeDeletedEvent>
 {
-    private readonly ILogger<BranchDeletedEventConsumer> _logger;
+    private readonly ILogger<EmployeeDeletedEventConsumer> _logger;
     private readonly ISearchServiceDbContext _dbContext;
 
-    public BranchDeletedEventConsumer(ILogger<BranchDeletedEventConsumer> logger, ISearchServiceDbContext dbContext)
+    public EmployeeDeletedEventConsumer(ILogger<EmployeeDeletedEventConsumer> logger, ISearchServiceDbContext dbContext)
     {
         _logger = logger;
         _dbContext = dbContext;
     }
 
-    public async Task Consume(ConsumeContext<BranchDeletedEvent> context)
+    public async Task Consume(ConsumeContext<EmployeeDeletedEvent> context)
     {
         var request = context.Message;
 
 
         var vectorDoc = await _dbContext.SearchVectorDocuments.FirstOrDefaultAsync(s =>
-            s.EntityId == request.BranchId && s.EntityType == SearchEntityType.Branch);
+            s.EntityId == request.EmployeeId && s.EntityType == SearchEntityType.Employee);
 
         if (vectorDoc == null)
         {
-            _logger.LogWarning("Document with EntityId {id} not found", request.BranchId);
+            _logger.LogWarning("Document with EntityId {id} not found", request.EmployeeId);
             return;
         }
 

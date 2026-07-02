@@ -5,7 +5,7 @@ using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 
-namespace QSearchService.Application.Consumers.CompanyServiceConsumers;
+namespace QSearchService.Application.Consumers.FullTextSearchConsumers.CompanyServiceConsumers;
 
 public class CompanyServiceCreatedEventConsumer : IConsumer<CompanyServiceCreatedEvent>
 {

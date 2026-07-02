@@ -5,7 +5,7 @@ using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 
-namespace QSearchService.Application.Consumers.BranchConsumers;
+namespace QSearchService.Application.Consumers.FullTextSearchConsumers.BranchConsumers;
 
 public class BranchCreatedEventConsumer : IConsumer<BranchCreatedEvent>
 {

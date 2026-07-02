@@ -5,7 +5,7 @@ using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 using QUserService.Contracts.Events.CustomerEvent;
 
-namespace QSearchService.Application.Consumers.CustomerConsumers;
+namespace QSearchService.Application.Consumers.FullTextSearchConsumers.CustomerConsumers;
 
 public class CustomerCreatedEventConsumer : IConsumer<CustomerCreatedEvent>
 {
@@ -22,7 +22,7 @@ public class CustomerCreatedEventConsumer : IConsumer<CustomerCreatedEvent>
     {
         var request = context.Message;
         _logger.LogInformation("Creating search document for EntityType {EntityType}", SearchEntityType.Customer);
-        
+
 
         var vectorDoc = new SearchVectorDocument
         {
@@ -33,6 +33,7 @@ public class CustomerCreatedEventConsumer : IConsumer<CustomerCreatedEvent>
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
+
 
         await _dbContext.SearchVectorDocuments.AddAsync(vectorDoc, context.CancellationToken);
         await _dbContext.SaveChangesAsync(context.CancellationToken);

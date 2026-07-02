@@ -5,9 +5,9 @@ using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QUserService.Contracts.Events.CustomerEvent;
 
-namespace QSearchService.Application.Consumers.CustomerConsumers;
+namespace QSearchService.Application.Consumers.FullTextSearchConsumers.CustomerConsumers;
 
-public class CustomerUpdatedEventConsumer: IConsumer<CustomerUpdatedEvent>
+public class CustomerUpdatedEventConsumer : IConsumer<CustomerUpdatedEvent>
 {
     private readonly ILogger<CustomerUpdatedEventConsumer> _logger;
     private readonly ISearchServiceDbContext _dbContext;
@@ -36,8 +36,8 @@ public class CustomerUpdatedEventConsumer: IConsumer<CustomerUpdatedEvent>
         customer.Subtitle = request.PhoneNumber;
         customer.UpdatedAt = DateTime.UtcNow;
 
+
         await _dbContext.SaveChangesAsync(context.CancellationToken);
         _logger.LogInformation("Search document updated successfully");
-        
     }
 }
