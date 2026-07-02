@@ -28,8 +28,8 @@ public class BranchCreatedEventConsumer : IConsumer<BranchCreatedEvent>
         {
             EntityId = request.BranchId,
             EntityType = SearchEntityType.Branch,
-            Title = $"{request.BranchName} {request.EmailAddress}",
-            Subtitle = request.PhoneNumber,
+            Title = request.BranchName,
+            Subtitle = $"{request.PhoneNumber} {request.EmailAddress}",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

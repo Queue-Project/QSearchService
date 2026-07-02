@@ -29,7 +29,7 @@ public class EmployeeCreatedEventConsumer : IConsumer<EmployeeCreatedEvent>
             EntityId = request.EmployeeId,
             EntityType = SearchEntityType.Employee,
             Title = $"{request.FirstName} {request.LastName}",
-            Subtitle = request.PhoneNumber,
+            Subtitle = $"{request.PhoneNumber} {request.Position}",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
