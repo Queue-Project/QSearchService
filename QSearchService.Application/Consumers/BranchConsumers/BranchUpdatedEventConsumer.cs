@@ -21,20 +21,20 @@ public class BranchUpdatedEventConsumer: IConsumer<BranchUpdatedEvent>
     public async Task Consume(ConsumeContext<BranchUpdatedEvent> context)
     {
         var request = context.Message;
-        _logger.LogInformation("Updating search document for EntityType {EntityType}", SearchEntityType.Customer);
+        _logger.LogInformation("Updating search document for EntityType {EntityType}", SearchEntityType.Branch);
 
-        var customer = await _dbContext.SearchVectorDocuments.FirstOrDefaultAsync(s =>
+        var branch = await _dbContext.SearchVectorDocuments.FirstOrDefaultAsync(s =>
             s.EntityId == request.BranchId && s.EntityType == SearchEntityType.Branch);
 
-        if (customer == null)
+        if (branch == null)
         {
             _logger.LogWarning("Document with EntityId {id} not found", request.BranchId);
             return;
         }
 
-        customer.Title = $"{request.BranchId} {request.EmailAddress}";
-        customer.Subtitle = request.PhoneNumber;
-        customer.UpdatedAt = DateTime.UtcNow;
+        branch.Title = $"{request.BranchId} {request.EmailAddress}";
+        branch.Subtitle = request.PhoneNumber;
+        branch.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync(context.CancellationToken);
         _logger.LogInformation("Search document updated successfully");

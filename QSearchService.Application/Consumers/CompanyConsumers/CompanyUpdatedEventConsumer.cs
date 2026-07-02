@@ -21,20 +21,20 @@ public class CompanyUpdatedEventConsumer: IConsumer<CompanyUpdatedEvent>
     public async Task Consume(ConsumeContext<CompanyUpdatedEvent> context)
     {
         var request = context.Message;
-        _logger.LogInformation("Updating search document for EntityType {EntityType}", SearchEntityType.Customer);
+        _logger.LogInformation("Updating search document for EntityType {EntityType}", SearchEntityType.Company);
 
-        var customer = await _dbContext.SearchVectorDocuments.FirstOrDefaultAsync(s =>
+        var company = await _dbContext.SearchVectorDocuments.FirstOrDefaultAsync(s =>
             s.EntityId == request.CompanyId && s.EntityType == SearchEntityType.Company);
 
-        if (customer == null)
+        if (company == null)
         {
             _logger.LogWarning("Document with EntityId {id} not found", request.CompanyId);
             return;
         }
 
-        customer.Title = $"{request.CompanyName} {request.EmailAddress}";
-        customer.Subtitle = request.PhoneNumber;
-        customer.UpdatedAt = DateTime.UtcNow;
+        company.Title = $"{request.CompanyName} {request.EmailAddress}";
+        company.Subtitle = request.PhoneNumber;
+        company.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync(context.CancellationToken);
         _logger.LogInformation("Search document updated successfully");

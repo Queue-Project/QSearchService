@@ -21,7 +21,7 @@ public class BranchCreatedEventConsumer : IConsumer<BranchCreatedEvent>
     public async Task Consume(ConsumeContext<BranchCreatedEvent> context)
     {
         var request = context.Message;
-        _logger.LogInformation("Creating search document for EntityType {EntityType}", SearchEntityType.Company);
+        _logger.LogInformation("Creating search document for EntityType {EntityType}", SearchEntityType.Branch);
 
 
         var vectorDoc = new SearchVectorDocument
