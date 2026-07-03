@@ -9,5 +9,5 @@ public class SearchItem
 
     public string Title { get; set; }
     public string? Subtitle { get; set; }
-    public float Rank { get; set; }
+    public double Rank { get; set; }
 }
