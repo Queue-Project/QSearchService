@@ -33,7 +33,7 @@ public class BranchUpdatedEventConsumer: IConsumer<BranchUpdatedEvent>
         }
 
         branch.Title = request.BranchName;
-        branch.Subtitle = $"{request.PhoneNumber}, {request.EmailAddress}";
+        branch.Subtitle = $"{request.PhoneNumber}, {request.EmailAddress} {request.Address} {request.City}";
         branch.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync(context.CancellationToken);

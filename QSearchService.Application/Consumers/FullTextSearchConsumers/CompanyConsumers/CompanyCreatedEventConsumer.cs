@@ -29,7 +29,7 @@ public class CompanyCreatedEventConsumer : IConsumer<CompanyCreatedEvent>
             EntityId = request.CompanyId,
             EntityType = SearchEntityType.Company,
             Title = request.CompanyName,
-            Subtitle = $"{request.PhoneNumber}, {request.EmailAddress}",
+            Subtitle = $"{request.PhoneNumber}, {request.EmailAddress} {request.Address}",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

@@ -33,7 +33,7 @@ public class CompanyUpdatedEventConsumer: IConsumer<CompanyUpdatedEvent>
         }
 
         company.Title = request.CompanyName;
-        company.Subtitle = $"{request.PhoneNumber}, {request.EmailAddress}";
+        company.Subtitle = $"{request.PhoneNumber}, {request.EmailAddress} {request.Address}";
         company.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync(context.CancellationToken);
