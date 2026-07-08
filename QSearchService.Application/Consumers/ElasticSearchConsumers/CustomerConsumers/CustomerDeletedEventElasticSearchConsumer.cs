@@ -1,6 +1,7 @@
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Models;
 using QUserService.Contracts.Events.CustomerEvent;
 
@@ -9,13 +10,13 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.CustomerCo
 public class CustomerDeletedEventElasticSearchConsumer : IConsumer<CustomerDeletedEvent>
 {
     private readonly ILogger<CustomerDeletedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
+    private readonly IElasticSearchIndexService _indexService;
 
     public CustomerDeletedEventElasticSearchConsumer(ILogger<CustomerDeletedEventElasticSearchConsumer> logger,
-        ElasticsearchClient client)
+        IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
 
     public async Task Consume(ConsumeContext<CustomerDeletedEvent> context)
@@ -25,17 +26,8 @@ public class CustomerDeletedEventElasticSearchConsumer : IConsumer<CustomerDelet
 
         _logger.LogInformation("Deleting from Elasticsearch");
 
-        var response = await _client.DeleteAsync<ElasticSearchIndex>(request.CustomerId.ToString(),
-            d => d.Index("search-index"));
-
-        if (!response.IsValidResponse)
-        {
-            _logger.LogError(
-                "Failed to delete document with Id {DocumentId} from Elasticsearch: {response.DebugInformation}",
-                request.CustomerId, response.DebugInformation);
-            throw new Exception(
-                $"Failed to delete document with ID {request.CustomerId} from Elasticsearch: {response.DebugInformation}");
-        }
+        await _indexService.DeleteAsync(request.CustomerId, context.CancellationToken);
+        
 
         _logger.LogInformation("Search document deleted successfully from Elasticsearch");
     }

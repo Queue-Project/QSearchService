@@ -1,6 +1,7 @@
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 using QUserService.Contracts.Events.CustomerEvent;
@@ -10,13 +11,13 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.CustomerCo
 public class CustomerUpdatedEventElasticSearchConsumer : IConsumer<CustomerUpdatedEvent>
 {
     private readonly ILogger<CustomerUpdatedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
+    private readonly IElasticSearchIndexService _indexService;
 
     public CustomerUpdatedEventElasticSearchConsumer(ILogger<CustomerUpdatedEventElasticSearchConsumer> logger,
-        ElasticsearchClient client)
+        IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
 
     public async Task Consume(ConsumeContext<CustomerUpdatedEvent> context)
@@ -25,23 +26,17 @@ public class CustomerUpdatedEventElasticSearchConsumer : IConsumer<CustomerUpdat
 
 
         _logger.LogInformation("Updating document from Elasticsearch");
-        var response = await _client.UpdateAsync<ElasticSearchIndex, ElasticSearchIndex>("search-index",
-            request.CustomerId.ToString(), u => u.Doc(new ElasticSearchIndex
-            {
-                EntityId = request.CustomerId,
-                EntityType = SearchEntityType.Customer,
-                Title = $"{request.FirstName} {request.LastName}",
-                Subtitle = request.PhoneNumber,
-                SearchText = $"{request.FirstName} {request.LastName} {request.PhoneNumber}"
-            }).DocAsUpsert(true));
 
-
-        if (!response.IsValidResponse)
+        var doc = new ElasticSearchIndex
         {
-            _logger.LogError("Failed to update Elasticsearch: {ErrorReason}",
-                response.ElasticsearchServerError?.Error.Reason);
-            throw new Exception($"Failed to update Elasticsearch: {response.ElasticsearchServerError?.Error.Reason}");
-        }
+            EntityId = request.CustomerId,
+            EntityType = SearchEntityType.Customer,
+            Title = $"{request.FirstName} {request.LastName}",
+            Subtitle = request.PhoneNumber,
+            SearchText = $"{request.FirstName} {request.LastName} {request.PhoneNumber}"
+        };
+
+        await _indexService.UpdateAsync(doc, context.CancellationToken);
 
         _logger.LogInformation("Search document updated successfully from Elasticsearch");
     }

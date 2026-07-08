@@ -2,6 +2,7 @@ using BranchService.Contracts.Events.CompanyServiceEvents;
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 
@@ -10,12 +11,13 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.CompanySer
 public class CompanyServiceCreatedEventElasticSearchConsumer : IConsumer<CompanyServiceCreatedEvent>
 {
     private readonly ILogger<CompanyServiceCreatedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
+    private readonly IElasticSearchIndexService _indexService;
 
-    public CompanyServiceCreatedEventElasticSearchConsumer(ILogger<CompanyServiceCreatedEventElasticSearchConsumer> logger, ElasticsearchClient client)
+    public CompanyServiceCreatedEventElasticSearchConsumer(
+        ILogger<CompanyServiceCreatedEventElasticSearchConsumer> logger, IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
 
     public async Task Consume(ConsumeContext<CompanyServiceCreatedEvent> context)
@@ -34,19 +36,8 @@ public class CompanyServiceCreatedEventElasticSearchConsumer : IConsumer<Company
             SearchText = $"{request.ServiceName} {request.ServiceDescription} "
         };
 
-        var response = await _client.IndexAsync(doc, i =>
-            i.Index("search-index").Id(request.CompanyServiceId.ToString()), context.CancellationToken);
+        await _indexService.CreateAsync(doc, context.CancellationToken);
 
-        if (!response.IsValidResponse)
-        {
-            _logger.LogError(
-                "Failed to index company service {ServiceId}: {Reason}",
-                request.CompanyServiceId,
-                response.ElasticsearchServerError?.Error.Reason);
-
-            throw new Exception(
-                $"Failed to index company service {request.CompanyServiceId}");
-        }
 
         _logger.LogInformation("Search document created successfully with Id {Id}", request.CompanyServiceId);
     }

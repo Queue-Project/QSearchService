@@ -1,6 +1,7 @@
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 using QUserService.Contracts.Events.CustomerEvent;
@@ -10,13 +11,13 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.CustomerCo
 public class CustomerCreatedEventElasticSearchConsumer : IConsumer<CustomerCreatedEvent>
 {
     private readonly ILogger<CustomerCreatedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
+    private readonly IElasticSearchIndexService _indexService;
 
     public CustomerCreatedEventElasticSearchConsumer(ILogger<CustomerCreatedEventElasticSearchConsumer> logger,
-        ElasticsearchClient client)
+        IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
 
     public async Task Consume(ConsumeContext<CustomerCreatedEvent> context)
@@ -35,19 +36,7 @@ public class CustomerCreatedEventElasticSearchConsumer : IConsumer<CustomerCreat
             SearchText = $"{request.FirstName} {request.LastName} {request.PhoneNumber}"
         };
 
-        var response = await _client.IndexAsync(doc, i =>
-            i.Index("search-index").Id(request.CustomerId.ToString()), context.CancellationToken);
-
-        if (!response.IsValidResponse)
-        {
-            _logger.LogError(
-                "Failed to index customer {CustomerId}: {Reason}",
-                request.CustomerId,
-                response.ElasticsearchServerError?.Error.Reason);
-
-            throw new Exception(
-                $"Failed to index customer {request.CustomerId}");
-        }
+        await _indexService.CreateAsync(doc, context.CancellationToken);
 
         _logger.LogInformation("Search document created successfully with Id {Id}", request.CustomerId);
     }
