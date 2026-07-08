@@ -22,4 +22,9 @@
         <Using Include="Xunit"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\QSearchService.Application\QSearchService.Application.csproj" />
+      <ProjectReference Include="..\QSearchService.Infrastructure\QSearchService.Infrastructure.csproj" />
+    </ItemGroup>
+
 </Project>
