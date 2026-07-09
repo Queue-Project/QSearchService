@@ -11,10 +11,10 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.CompanyCon
 
 public class CompanyUpdatedEventElasticSearchConsumer : IConsumer<CompanyUpdatedEvent>
 {
-    private readonly ILogger<CompanyUpdatedEventConsumer> _logger;
+    private readonly ILogger<CompanyUpdatedEventElasticSearchConsumer> _logger;
     private readonly IElasticSearchIndexService _indexService;
 
-    public CompanyUpdatedEventElasticSearchConsumer(ILogger<CompanyUpdatedEventConsumer> logger,
+    public CompanyUpdatedEventElasticSearchConsumer(ILogger<CompanyUpdatedEventElasticSearchConsumer> logger,
         IElasticSearchIndexService indexService)
     {
         _logger = logger;
