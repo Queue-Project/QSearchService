@@ -200,7 +200,8 @@ PublishScripts/
 *.nuget.targets
 
 
-
+!QSearchServiceLocalNuget/
+!QSearchServiceLocalNuget/*.nupkg
 
 # Microsoft Azure Build Output
 csx/
