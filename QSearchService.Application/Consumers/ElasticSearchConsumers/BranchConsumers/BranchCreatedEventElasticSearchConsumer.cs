@@ -2,6 +2,7 @@ using BranchService.Contracts.Events.BranchEvents;
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 
@@ -10,13 +11,13 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.BranchCons
 public class BranchCreatedEventElasticSearchConsumer : IConsumer<BranchCreatedEvent>
 {
     private readonly ILogger<BranchCreatedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
+    private readonly IElasticSearchIndexService _indexService;
 
     public BranchCreatedEventElasticSearchConsumer(ILogger<BranchCreatedEventElasticSearchConsumer> logger,
-        ElasticsearchClient client)
+        IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
 
     public async Task Consume(ConsumeContext<BranchCreatedEvent> context)
@@ -32,22 +33,11 @@ public class BranchCreatedEventElasticSearchConsumer : IConsumer<BranchCreatedEv
             EntityType = SearchEntityType.Branch,
             Title = request.BranchName,
             Subtitle = $"{request.PhoneNumber} {request.EmailAddress}",
-            SearchText = $"{request.BranchName} {request.PhoneNumber} {request.EmailAddress} {request.Address} {request.City}"
+            SearchText =
+                $"{request.BranchName} {request.PhoneNumber} {request.EmailAddress} {request.Address} {request.City}"
         };
 
-        var response = await _client.IndexAsync(doc, i =>
-            i.Index("search-index").Id(request.BranchId.ToString()), context.CancellationToken);
-
-        if (!response.IsValidResponse)
-        {
-            _logger.LogError(
-                "Failed to index branch {BranchId}: {Reason}",
-                request.BranchId,
-                response.ElasticsearchServerError?.Error.Reason);
-
-            throw new Exception(
-                $"Failed to index branch {request.BranchId}");
-        }
+        await _indexService.CreateAsync(doc, context.CancellationToken);
 
         _logger.LogInformation("Search document created successfully with Id {Id}", request.BranchId);
     }

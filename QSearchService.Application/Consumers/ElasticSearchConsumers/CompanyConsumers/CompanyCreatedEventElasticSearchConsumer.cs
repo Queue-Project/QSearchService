@@ -2,6 +2,7 @@ using BranchService.Contracts.Events.CompanyEvents;
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 
@@ -10,12 +11,13 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.CompanyCon
 public class CompanyCreatedEventElasticSearchConsumer : IConsumer<CompanyCreatedEvent>
 {
     private readonly ILogger<CompanyCreatedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
+    private readonly IElasticSearchIndexService _indexService;
 
-    public CompanyCreatedEventElasticSearchConsumer(ILogger<CompanyCreatedEventElasticSearchConsumer> logger, ElasticsearchClient client)
+    public CompanyCreatedEventElasticSearchConsumer(ILogger<CompanyCreatedEventElasticSearchConsumer> logger,
+        IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
 
     public async Task Consume(ConsumeContext<CompanyCreatedEvent> context)
@@ -34,19 +36,8 @@ public class CompanyCreatedEventElasticSearchConsumer : IConsumer<CompanyCreated
             SearchText = $"{request.CompanyName} {request.PhoneNumber} {request.EmailAddress} {request.Address}"
         };
 
-        var response = await _client.IndexAsync(doc, i =>
-            i.Index("search-index").Id(request.CompanyId.ToString()), context.CancellationToken);
+        await _indexService.CreateAsync(doc, context.CancellationToken);
 
-        if (!response.IsValidResponse)
-        {
-            _logger.LogError(
-                "Failed to index company {CompanyId}: {Reason}",
-                request.CompanyId,
-                response.ElasticsearchServerError?.Error.Reason);
-
-            throw new Exception(
-                $"Failed to index company {request.CompanyId}");
-        }
 
         _logger.LogInformation("Search document created successfully with Id {Id}", request.CompanyId);
     }

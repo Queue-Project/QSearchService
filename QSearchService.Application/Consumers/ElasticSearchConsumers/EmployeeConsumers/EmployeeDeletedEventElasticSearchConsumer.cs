@@ -1,6 +1,7 @@
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Models;
 using QUserService.Contracts.Events.EmployeeEvent;
 
@@ -9,13 +10,14 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.EmployeeCo
 public class EmployeeDeletedEventElasticSearchConsumer : IConsumer<EmployeeDeletedEvent>
 {
     private readonly ILogger<EmployeeDeletedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
-    
-    
-    public EmployeeDeletedEventElasticSearchConsumer(ILogger<EmployeeDeletedEventElasticSearchConsumer> logger, ElasticsearchClient client)
+    private readonly IElasticSearchIndexService _indexService;
+
+
+    public EmployeeDeletedEventElasticSearchConsumer(ILogger<EmployeeDeletedEventElasticSearchConsumer> logger,
+        IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
 
     public async Task Consume(ConsumeContext<EmployeeDeletedEvent> context)
@@ -25,17 +27,7 @@ public class EmployeeDeletedEventElasticSearchConsumer : IConsumer<EmployeeDelet
 
         _logger.LogInformation("Deleting from Elasticsearch");
 
-        var response = await _client.DeleteAsync<ElasticSearchIndex>(request.EmployeeId.ToString(),
-            d => d.Index("search-index"));
-
-        if (!response.IsValidResponse)
-        {
-            _logger.LogError(
-                "Failed to delete document with Id {DocumentId} from Elasticsearch: {response.DebugInformation}",
-                request.EmployeeId, response.DebugInformation);
-            throw new Exception(
-                $"Failed to delete document with ID {request.EmployeeId} from Elasticsearch: {response.DebugInformation}");
-        }
+        await _indexService.DeleteAsync(request.EmployeeId, context.CancellationToken);
 
         _logger.LogInformation("Search document deleted successfully from Elasticsearch");
     }

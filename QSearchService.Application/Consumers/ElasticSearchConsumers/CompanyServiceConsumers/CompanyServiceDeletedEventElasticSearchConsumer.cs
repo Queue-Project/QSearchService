@@ -2,6 +2,7 @@ using BranchService.Contracts.Events.CompanyServiceEvents;
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Models;
 
 namespace QSearchService.Application.Consumers.ElasticSearchConsumers.CompanyServiceConsumers;
@@ -9,13 +10,13 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.CompanySer
 public class CompanyServiceDeletedEventElasticSearchConsumer : IConsumer<CompanyServiceDeletedEvent>
 {
     private readonly ILogger<CompanyServiceDeletedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
+    private readonly IElasticSearchIndexService _indexService;
 
     public CompanyServiceDeletedEventElasticSearchConsumer(
-        ILogger<CompanyServiceDeletedEventElasticSearchConsumer> logger, ElasticsearchClient client)
+        ILogger<CompanyServiceDeletedEventElasticSearchConsumer> logger, IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
 
     public async Task Consume(ConsumeContext<CompanyServiceDeletedEvent> context)
@@ -25,17 +26,7 @@ public class CompanyServiceDeletedEventElasticSearchConsumer : IConsumer<Company
 
         _logger.LogInformation("Deleting from Elasticsearch");
 
-        var response = await _client.DeleteAsync<ElasticSearchIndex>(request.CompanyServiceId.ToString(),
-            d => d.Index("search-index"));
-
-        if (!response.IsValidResponse)
-        {
-            _logger.LogError(
-                "Failed to delete document with Id {DocumentId} from Elasticsearch: {response.DebugInformation}",
-                request.CompanyServiceId, response.DebugInformation);
-            throw new Exception(
-                $"Failed to delete document with ID {request.CompanyServiceId} from Elasticsearch: {response.DebugInformation}");
-        }
+        await _indexService.DeleteAsync(request.CompanyServiceId, context.CancellationToken);
 
         _logger.LogInformation("Search document deleted successfully from Elasticsearch");
     }

@@ -1,6 +1,7 @@
 using Elastic.Clients.Elasticsearch;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using QSearchService.Application.Interfaces;
 using QSearchService.Domain.Enums;
 using QSearchService.Domain.Models;
 using QUserService.Contracts.Events.EmployeeEvent;
@@ -10,13 +11,15 @@ namespace QSearchService.Application.Consumers.ElasticSearchConsumers.EmployeeCo
 public class EmployeeCreatedEventElasticSearchConsumer : IConsumer<EmployeeCreatedEvent>
 {
     private readonly ILogger<EmployeeCreatedEventElasticSearchConsumer> _logger;
-    private readonly ElasticsearchClient _client;
+    private readonly IElasticSearchIndexService _indexService;
 
-    public EmployeeCreatedEventElasticSearchConsumer(ILogger<EmployeeCreatedEventElasticSearchConsumer> logger, ElasticsearchClient client)
+    public EmployeeCreatedEventElasticSearchConsumer(ILogger<EmployeeCreatedEventElasticSearchConsumer> logger,
+        IElasticSearchIndexService indexService)
     {
         _logger = logger;
-        _client = client;
+        _indexService = indexService;
     }
+
     public async Task Consume(ConsumeContext<EmployeeCreatedEvent> context)
     {
         var request = context.Message;
@@ -33,19 +36,7 @@ public class EmployeeCreatedEventElasticSearchConsumer : IConsumer<EmployeeCreat
             SearchText = $"{request.FirstName} {request.LastName} {request.PhoneNumber} {request.Position}"
         };
 
-        var response = await _client.IndexAsync(doc, i =>
-            i.Index("search-index").Id(request.EmployeeId.ToString()), context.CancellationToken);
-
-        if (!response.IsValidResponse)
-        {
-            _logger.LogError(
-                "Failed to index employee {EmployeeId}: {Reason}",
-                request.EmployeeId,
-                response.ElasticsearchServerError?.Error.Reason);
-
-            throw new Exception(
-                $"Failed to index employee {request.EmployeeId}");
-        }
+        await _indexService.CreateAsync(doc, context.CancellationToken);
 
         _logger.LogInformation("Search document created successfully with Id {Id}", request.EmployeeId);
     }

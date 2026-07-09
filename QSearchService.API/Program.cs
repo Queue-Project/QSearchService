@@ -95,6 +95,8 @@ builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ISearchServiceDbContext, SearchServiceDbContext>();
 builder.Services.AddScoped<IElasticSearchService, ElasticSearchService>();
+builder.Services.AddScoped<IElasticSearchIndexService, ElasticSearchIndexService>();
+
 
 builder.Services.AddDbContext<SearchServiceDbContext>(options =>
 {
